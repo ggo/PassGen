@@ -10,8 +10,10 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 
 import javax.swing.*;
+import javax.swing.UIManager.*;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -70,9 +72,25 @@ public class PassGenUI {
         // Make sure we have nice window decorations.
         JFrame.setDefaultLookAndFeelDecorated(true);
 
+        // Define Nimbus como Look & Feel. 
+        setLookAndFeel();
+
         // Create and set up the window.
         JFrame frame = new JFrame("PassGen");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        // Set the icon for the main windows
+        String pathToIcon = System.getProperty("user.dir"); 
+        System.out.println("pathToIcon(user.dir): " + System.getProperty("user.dir"));
+        System.out.println("pathToIcon(user.home): " + System.getProperty("user.home"));
+
+        ClassLoader rl = Thread.currentThread().getContextClassLoader();
+        URL url = rl.getResource("icon.png");
+        System.out.println("URL to the resources::" + url);
+        //.getResource().toString();        
+
+        ImageIcon img = new ImageIcon(url);        
+        frame.setIconImage(img.getImage());
 
         // frame.setLocationRelativeTo(null); // Centra el frame
         // Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
@@ -180,10 +198,25 @@ public class PassGenUI {
         includeSpecialCharacter = checkBox.isSelected();
     }
 
+    public void setLookAndFeel() {
+
+        try {
+            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            // If Nimbus is not available, you can set the GUI to another look and feel.
+            // TODO:
+        }        
+    }
+
 	public static void main(String[] args) {
         
         PassGenUI passGenUI = new PassGenUI();
-
+        
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
