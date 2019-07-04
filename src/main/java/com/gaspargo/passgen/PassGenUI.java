@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 package com.gaspargo.passgen;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -48,7 +49,7 @@ public class PassGenUI {
 
     private JCheckBox checkBox;
 
-    private JTextField textField;
+    private JTextArea textArea;
 
     public PassGenUI() {
         loadResources();
@@ -72,63 +73,42 @@ public class PassGenUI {
         // Make sure we have nice window decorations.
         JFrame.setDefaultLookAndFeelDecorated(true);
 
-        // Define Nimbus como Look & Feel. 
+        // Try to set Nimbus como Look & Feel, else keep Metal
         setLookAndFeel();
 
-        // Create and set up the window.
+        // Create and set up the window
         JFrame frame = new JFrame("PassGen");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        // Set the icon for the main windows
-        String pathToIcon = System.getProperty("user.dir"); 
-        System.out.println("pathToIcon(user.dir): " + System.getProperty("user.dir"));
-        System.out.println("pathToIcon(user.home): " + System.getProperty("user.home"));
 
+        // Set initial size
+        frame.setPreferredSize(new Dimension(640, 480));
+        frame.pack();
+        
+        // Load the icon for the main windows
         ClassLoader rl = Thread.currentThread().getContextClassLoader();
         URL url = rl.getResource("icon.png");
-        System.out.println("URL to the resources::" + url);
-        //.getResource().toString();        
 
+        // Se the icon to the JFrame
         ImageIcon img = new ImageIcon(url);        
         frame.setIconImage(img.getImage());
 
-        // frame.setLocationRelativeTo(null); // Centra el frame
-        // Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        // frame.setBounds(0, 0, screenSize.width, screenSize.height);
-
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        frame.setLocation(dim.width / 2 - frame.getSize().width / 2, dim.height / 2 - frame.getSize().height / 2);
+        frame.setLocation(dim.width / 2 - frame.getSize().width / 2, dim.height / 2 - frame.getSize().height / 2 );
 
         // Main Panel
         JPanel mainPane = new JPanel();
-        mainPane.setLayout(new BoxLayout(mainPane, BoxLayout.PAGE_AXIS));
+        mainPane.setLayout(new BoxLayout(mainPane, BoxLayout.Y_AXIS));
+        //mainPane.setBackground(Color.GREEN);
 
         // Title
         JLabel label = new JLabel(rb.getString("main.title"));
         label.setFont(new Font("Helvetica", Font.BOLD, 18));
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         mainPane.add(label);
         mainPane.add(Box.createRigidArea(new Dimension(0, 5)));
 
-        // Separator
-        mainPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        // Generate Button & the action listener
-        JButton button = new JButton(rb.getString("main.button.generate"));
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                buttonGeneratePressed();
-            }
-        });
-        mainPane.add(button);
-
-        // Separator
-        mainPane.add(Box.createRigidArea(new Dimension(0,5)));
-
-        // generated password textField
-        textField = new JTextField();
-        mainPane.add(textField);
-        
+        // ....
         // Password length list
         String s1[] = { "6", "8", "16", "32", "64", "128", "256", "512", "1024" };
         comboBox = new JComboBox<String>(s1);
@@ -141,11 +121,9 @@ public class PassGenUI {
         comboBox.setEditable(true);
 
         JPanel panel1 = new JPanel(new FlowLayout());
-        JLabel label1 = new JLabel(rb.getString("main.passwordlenght"));
-        panel1.add(label1);
-        panel1.add(comboBox);
-        mainPane.add(panel1);
+        panel1.setMaximumSize(new Dimension(1024, 50));
 
+        JLabel label1 = new JLabel(rb.getString("main.passwordlenght"));
         // Include special character checkbox
         checkBox = new JCheckBox(rb.getString("main.combospecialcharacter"));
         checkBox.addActionListener(new ActionListener() {
@@ -154,7 +132,38 @@ public class PassGenUI {
                 checkboxSpecialCharacterPressed();
             }
         });
-        mainPane.add(checkBox);
+
+        panel1.add(label1);
+        panel1.add(comboBox);
+        panel1.add(checkBox);  
+        
+        //panel1.setBackground(Color.ORANGE);
+        mainPane.add(panel1);   
+
+        // Generate Button & the action listener
+        JButton button = new JButton(rb.getString("main.button.generate"));
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                buttonGeneratePressed();
+            }
+        });
+        mainPane.add(button);
+
+        // Separator
+        mainPane.add(Box.createRigidArea(new Dimension(0,5)));
+
+        // generated password textField
+        textArea = new JTextArea();
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        
+        // To create scrollable Textarea
+        JScrollPane scroll = new JScrollPane(textArea);
+        scroll.setAlignmentY(Component.TOP_ALIGNMENT);
+        mainPane.add(scroll);
 
         frame.add(mainPane);
 
@@ -172,7 +181,7 @@ public class PassGenUI {
         passGen.setIncludeSpecialCharacter(includeSpecialCharacter);
 
         String password = passGen.generatePassword();
-        textField.setText(password);
+        textArea.setText(password);
     }
 
     /**
@@ -199,7 +208,6 @@ public class PassGenUI {
     }
 
     public void setLookAndFeel() {
-
         try {
             for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -208,8 +216,8 @@ public class PassGenUI {
                 }
             }
         } catch (Exception e) {
-            // If Nimbus is not available, you can set the GUI to another look and feel.
-            // TODO:
+            // If Nimbus is not available, we keep the default & cross platform 
+            // look and feel METAL.
         }        
     }
 
